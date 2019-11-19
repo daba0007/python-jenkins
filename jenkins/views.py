@@ -22,7 +22,7 @@ def getJobStatus(request):
 
 
 def getBuildConsole(request):
-    return HttpResponse(jobInfo(jobname="pipeline_test", buildnum=14, ip="192.168.1.150", uname="admin", pwd="r00tme",
+    return HttpResponse(jobInfo(jobname="pipeline_test", buildnum=16, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getBuildConsole())
 
 
@@ -34,3 +34,8 @@ def getDownstream(request):
 def getUpstream(request):
     return HttpResponse(jobInfo(jobname="second-stage-1", buildnum=5, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getUpstreamBuild())
+
+
+def getBuildobStatus(request):
+    return HttpResponse(jobInfo(jobname="pipeline_test", buildnum=11, ip="192.168.1.150", uname="admin", pwd="r00tme",
+                                port="18080").getBuildobStatus())

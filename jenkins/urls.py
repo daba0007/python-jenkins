@@ -11,5 +11,6 @@ urlpatterns = [
     url(r'^getjobstatus', views.getJobStatus, name='getjobStatus'),
     url(r'^getbuildconsole', views.getBuildConsole, name='getbuildconsole'),
     url(r'^getdownstream', views.getDownstream, name='getdownstream'),
-    url(r'^getupstream', views.getUpstream, name='getupstream')
+    url(r'^getupstream', views.getUpstream, name='getupstream'),
+    url(r'^getbuildobstatus', views.getBuildobStatus, name='getbuildobstatus')
 ]

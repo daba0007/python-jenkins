@@ -7,6 +7,12 @@ import xmltodict
 import json
 
 
+class Err(Exception):
+    def __init__(self, err):
+        Exception.__init__(self)
+        self.err = err
+
+
 class Job(object):
     """
     deal with job
@@ -23,6 +29,59 @@ class Job(object):
         return json.dumps(self.server.keys(), indent=4)
 
     def getConfig(self, jobname):
+        """
+        {
+            "flow-definition": {
+                "@plugin": "workflow-job@2.36",
+                "actions": {
+                    "org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction": {
+                        "@plugin": "pipeline-model-definition@1.4.0"
+                    },
+                    "org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction": {
+                        "@plugin": "pipeline-model-definition@1.4.0",
+                        "jobProperties": null,
+                        "triggers": null,
+                        "parameters": null,
+                        "options": null
+                    }
+                },
+                "description": null,
+                "keepDependencies": "false",
+                "properties": {
+                    "hudson.model.ParametersDefinitionProperty": {
+                        "parameterDefinitions": {
+                            "hudson.model.StringParameterDefinition": {
+                                "name": "json",
+                                "description": null,
+                                "defaultValue": "first-stage",
+                                "trim": "false"
+                            },
+                            "hudson.model.BooleanParameterDefinition": [
+                                {
+                                    "name": "first_stage",
+                                    "description": null,
+                                    "defaultValue": "true"
+                                },
+                                {
+                                    "name": "second_stage",
+                                    "description": null,
+                                    "defaultValue": "false"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "definition": {
+                    "@class": "org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition",
+                    "@plugin": "workflow-cps@2.76",
+                    "script": "pipeline {\n   agent any\n\n   stages {\n      stage('First Stage') {\n        when {\n          environment name: 'first_stage',\n          value: 'true'\n        }\n        steps {\n          build job: 'first-stage-1', parameters: [booleanParam(name: 'run_build', value: 'true'), string(name: 'data', value: params.json)]\n        }\n      }\n      stage('Second Stage') {\n        when {\n          environment name: 'second_stage',\n          value: 'true'\n        }\n        steps {\n          build job: 'second-stage-1', parameters: [booleanParam(name: 'run_build', value: 'true'), string(name: 'data', value: params.json)]\n        }\n      }\n   }\n}",
+                    "sandbox": "true"
+                },
+                "triggers": null,
+                "disabled": "false"
+            }
+        }
+        """
         return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
 
     def getJobStatus(self, jobname):
@@ -40,7 +99,14 @@ class Job(object):
 
     def paramBuild(self, jobname, params):
         buildnum = self.server.build_job(jobname, params)
-        return buildnum
+        return json.dumps(buildnum, indent=4)
+
+    def getLastBuid(self, jobname):
+        """
+        :param jobname:
+        :return: type(int)
+        """
+        return self.server[jobname].get_last_good_build().__dict__['buildno']
 
 
 class jobInfo(Job):
@@ -174,18 +240,49 @@ class jobInfo(Job):
                 self.obj = Build(i['url'], i['number'], self.server[jobname])
                 break
 
+    def __getattr__(self, attr):
+        if attr == 'obj':
+            return "error"
+
     def getBuildConsole(self):
-        return json.dumps(self.obj.get_console(), indent=4)
+        result = self.obj
+        if result =="error":
+            result = {}
+            result["message"] = "the build num is beyond the last build num"
+            return json.dumps(result, indent=4)
+        else:
+            return json.dumps(result.get_console(), indent=4)
 
     def getDownstreamBuild(self):
-        downstream = []
-        for i in self.obj.get_console().split('\n'):
-            if "Starting building:" in i:
-                downstream.append({'name': i.split(' ')[2], 'buildnum': i.split(' ')[3].strip('#')})
-        return json.dumps(downstream, indent=4)
+        result = self.obj
+        if result == "err":
+            result = {}
+            result["message"] = "the build num is beyond the last build num"
+            return json.dumps(result, indent=4)
+        else:
+            result = []
+            for i in self.obj.get_console().split('\n'):
+                if "Starting building:" in i:
+                    result.append({'name': i.split(' ')[2], 'buildnum': i.split(' ')[3].strip('#')})
+            return json.dumps(result, indent=4)
 
     def getUpstreamBuild(self):
-        upstream = {}
-        upstream['name'] = self.obj.get_upstream_job().__dict__["name"]
-        upstream['buildnum'] = self.obj.get_upstream_build_number()
-        return json.dumps(upstream, indent=4)
+        result = self.obj
+        if result == "err":
+            result = {}
+            result["message"] = "the build num is beyond the last build num"
+            return json.dumps(result, indent=4)
+        else:
+            result = {}
+            result['name'] = self.obj.get_upstream_job().__dict__["name"]
+            result['buildnum'] = self.obj.get_upstream_build_number()
+            return json.dumps(result, indent=4)
+
+    def getBuildobStatus(self):
+        result = self.obj
+        if result == "err":
+            result = {}
+            result["message"] = "the build num is beyond the last build num"
+            return json.dumps(result, indent=4)
+        else:
+            return json.dumps(self.obj.get_status(), indent=4)
