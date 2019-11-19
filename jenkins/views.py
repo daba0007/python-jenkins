@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, HttpResponse
-from core import Job, jobInfo
+from .core import Job, jobInfo
 
 
 def getVersion(request):
