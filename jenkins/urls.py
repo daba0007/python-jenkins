@@ -9,4 +9,7 @@ urlpatterns = [
     url(r'^getjoblist', views.getJobList, name='getjobList'),
     url(r'^getconfig', views.getConfig, name='getconfig'),
     url(r'^getjobstatus', views.getJobStatus, name='getjobStatus'),
+    url(r'^getbuildconsole', views.getBuildConsole, name='getbuildconsole'),
+    url(r'^getdownstream', views.getDownstream, name='getdownstream'),
+    url(r'^getupstream', views.getUpstream, name='getupstream')
 ]

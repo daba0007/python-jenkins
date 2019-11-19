@@ -37,3 +37,33 @@ class Job(object):
         jsdict = json.loads(config)
         print xmltodict.unparse(jsdict, encoding='utf-8')
         return
+
+    def paramBuild(self, jobname, params):
+        buildnum = self.server.build_job(jobname, params)
+        return buildnum
+
+
+class jobInfo(Job):
+    def __init__(self, jobname, buildnum, **kwargs):
+        super(jobInfo, self).__init__(**kwargs)
+        for i in self.server[jobname].__dict__['_data']['builds']:
+            if i['number'] == buildnum:
+                self.obj = Build(i['url'], i['number'], self.server[jobname])
+                break
+
+    def getBuildConsole(self):
+        return json.dumps(self.obj.get_console())
+
+    def getDownstreamBuild(self):
+        downstream = []
+        for i in self.obj.get_console().split('\n'):
+            if "Starting building:" in i:
+                print i
+                downstream.append({'name': i.split(' ')[2], 'buildnum': i.split(' ')[3].strip('#')})
+        return json.dumps(downstream)
+
+    def getUpstreamBuild(self):
+        print self.obj.get_upstream_build()
+        print self.obj.get_upstream_build_number()
+        print self.obj.get_upstream_job()
+        return json.dumps(self.obj.get_upstream_build_number())
