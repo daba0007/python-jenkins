@@ -3,8 +3,21 @@
 
 from jenkinsapi.jenkins import Jenkins
 from jenkinsapi.build import Build
+from python_jenkins.settings import INITIAL_PATH
 import xmltodict
 import json
+import os
+
+
+def buildcheck(func):
+    def wrapper(self, *args, **kw):
+        if self.obj == "error":
+            result = dict()
+            result["message"] = "the build num is beyond the last build num"
+            return json.dumps(result, indent=4)
+        return func(self, *args, **kw)
+
+    return wrapper
 
 
 class Job(object):
@@ -150,13 +163,20 @@ class Job(object):
         :param config: json
         :return: string
         """
-        if jobname in json.loads(self.getjoblist()):
-            self.server.create_job(jobname, xmltodict.unparse(json.loads(config), encoding='utf-8'))
-            return jobname
-        else:
-            result = dict()
-            result["message"] = "there is no such job"
-            return json.dumps(result, indent=4)
+        self.server.create_job(jobname, xmltodict.unparse(json.loads(config), encoding='utf-8'))
+        return jobname
+
+    def initialjob(self):
+        result = dict()
+        result["filelist"] = os.listdir(INITIAL_PATH)
+        for i in os.listdir(INITIAL_PATH):
+            jobname = i.replace('.json', '')
+            if jobname not in json.loads(self.getjoblist()):
+                with open(INITIAL_PATH+i, 'r') as f:
+                    job_dict = json.load(f)
+                    self.server.create_job(jobname, xmltodict.unparse(job_dict, encoding='utf-8').encode())
+        return json.dumps(result, indent=4)
+
 
 
 class JobInfo(Job):
@@ -297,16 +317,6 @@ class JobInfo(Job):
     def __getattr__(self, attr):
         if attr == 'obj':
             return "error"
-
-    def buildcheck(self, func):
-        def wrapper(*args, **kw):
-            if self.obj == "error":
-                result = dict()
-                result["message"] = "the build num is beyond the last build num"
-                return json.dumps(result, indent=4)
-            return func(self, *args, **kw)
-
-        return wrapper
 
     @buildcheck
     def getbuildonsole(self):

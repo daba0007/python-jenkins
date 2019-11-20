@@ -46,3 +46,7 @@ def getupstream(request):
 def getbuildobstatus(request):
     return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=11, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getBuildobStatus())
+
+
+def initial(request):
+    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").initialjob())
