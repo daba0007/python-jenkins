@@ -18,12 +18,6 @@ def buildcheck(func):
     return wrapper
 
 
-class Err(Exception):
-    def __init__(self, err):
-        Exception.__init__(self)
-        self.err = err
-
-
 class Job(object):
     """
     deal with job
@@ -121,6 +115,13 @@ class Job(object):
         infolist['enabled'] = self.server[jobname].is_enabled()
         return json.dumps(infolist, indent=4)
 
+    def getlastbuid(self, jobname):
+        """
+        :param jobname:
+        :return: type(int)
+        """
+        return self.server[jobname].get_last_good_build().__dict__['buildno']
+
     def parambuild(self, jobname, params):
         """
         create new job
@@ -130,18 +131,22 @@ class Job(object):
         """
         return json.dumps(self.server.build_job(jobname, params), indent=4)
 
-    def getlastbuid(self, jobname):
+    def initnewjob(self, jobname, config):
         """
-        :param jobname:
-        :return: type(int)
+        create new job
+        :param jobname: string
+        :param config: json
+        :return: string
         """
-        return self.server[jobname].get_last_good_build().__dict__['buildno']
+        self.server.create_job(jobname, xmltodict.unparse(json.loads(config), encoding='utf-8'))
+        return jobname
 
 
 class JobInfo(Job):
     """
     deal with builded job info
     """
+
     def __init__(self, jobname, buildnum, **kwargs):
         """
         # self.server[jobname].__dict__['_data']
