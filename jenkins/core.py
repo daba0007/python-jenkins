@@ -34,13 +34,26 @@ class Job(object):
         self.server = Jenkins(self.url, username=uname, password=pwd)
 
     def getversion(self):
+        """
+        get jenkins version
+        :return: string
+        """
         return json.dumps(self.server.version, indent=4)
 
     def getjoblist(self):
+        """
+        get all job
+        :return: list
+        """
         return json.dumps(self.server.keys(), indent=4)
 
     def getconfig(self, jobname):
         """
+        get job's config
+        :param jobname: string
+        :return: list
+
+        # config.json(from xml to json)
         {
             "flow-definition": {
                 "@plugin": "workflow-job@2.36",
@@ -96,6 +109,11 @@ class Job(object):
         return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
 
     def getjobstatus(self, jobname):
+        """
+        get job's status
+        :param jobname: string
+        :return:
+        """
         infolist = dict()
         infolist['name'] = self.server[jobname].name
         infolist['description'] = self.server[jobname].get_description()
@@ -104,8 +122,13 @@ class Job(object):
         return json.dumps(infolist, indent=4)
 
     def parambuild(self, jobname, params):
-        buildnum = self.server.build_job(jobname, params)
-        return json.dumps(buildnum, indent=4)
+        """
+        create new job
+        :param jobname: string
+        :param params: dict
+        :return:
+        """
+        return json.dumps(self.server.build_job(jobname, params), indent=4)
 
     def getlastbuid(self, jobname):
         """
@@ -116,6 +139,9 @@ class Job(object):
 
 
 class JobInfo(Job):
+    """
+    deal with builded job info
+    """
     def __init__(self, jobname, buildnum, **kwargs):
         """
         # self.server[jobname].__dict__['_data']
@@ -252,10 +278,18 @@ class JobInfo(Job):
 
     @buildcheck
     def getbuildonsole(self):
+        """
+        get all console from job
+        :return: json
+        """
         return json.dumps(self.obj.get_console(), indent=4)
 
     @buildcheck
     def getdownstreambuild(self):
+        """
+        get downstream job list
+        :return: json
+        """
         result = []
         for i in self.obj.get_console().split('\n'):
             if "Starting building:" in i:
@@ -264,6 +298,10 @@ class JobInfo(Job):
 
     @buildcheck
     def getupstreambuild(self):
+        """
+        get upstream job
+        :return: json
+        """
         result = dict()
         result['name'] = self.obj.get_upstream_job().__dict__["name"]
         result['buildnum'] = self.obj.get_upstream_build_number()
@@ -271,4 +309,8 @@ class JobInfo(Job):
 
     @buildcheck
     def getbuildobstatus(self):
+        """
+        get builded-job status
+        :return: json
+        """
         return json.dumps(self.obj.get_status(), indent=4)
