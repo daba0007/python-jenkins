@@ -7,17 +7,6 @@ import xmltodict
 import json
 
 
-def buildcheck(func):
-    def wrapper(self, *args, **kw):
-        if self.obj == "error":
-            result = dict()
-            result["message"] = "the build num is beyond the last build num"
-            return json.dumps(result, indent=4)
-        return func(self, *args, **kw)
-
-    return wrapper
-
-
 class Job(object):
     """
     deal with job
@@ -99,8 +88,16 @@ class Job(object):
                 "disabled": "false"
             }
         }
+        path = os.path.join("initial", jobname + ".json")
+        with open(path, 'w') as f:
+            json.dump(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), f)
         """
-        return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
+        if jobname in json.loads(self.getjoblist()):
+            return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
+        else:
+            result = dict()
+            result["message"] = "there is no such job"
+            return json.dumps(result, indent=4)
 
     def getjobstatus(self, jobname):
         """
@@ -108,19 +105,29 @@ class Job(object):
         :param jobname: string
         :return:
         """
-        infolist = dict()
-        infolist['name'] = self.server[jobname].name
-        infolist['description'] = self.server[jobname].get_description()
-        infolist['running'] = self.server[jobname].is_running()
-        infolist['enabled'] = self.server[jobname].is_enabled()
-        return json.dumps(infolist, indent=4)
+        if jobname in json.loads(self.getjoblist()):
+            result = dict()
+            result['name'] = self.server[jobname].name
+            result['description'] = self.server[jobname].get_description()
+            result['running'] = self.server[jobname].is_running()
+            result['enabled'] = self.server[jobname].is_enabled()
+            return json.dumps(result, indent=4)
+        else:
+            result = dict()
+            result["message"] = "there is no such job"
+            return json.dumps(result, indent=4)
 
     def getlastbuid(self, jobname):
         """
         :param jobname:
         :return: type(int)
         """
-        return self.server[jobname].get_last_good_build().__dict__['buildno']
+        if jobname in json.loads(self.getjoblist()):
+            return json.dumps(self.server[jobname].get_last_good_build().__dict__['buildno'], indent=4)
+        else:
+            result = dict()
+            result["message"] = "there is no such job"
+            return json.dumps(result, indent=4)
 
     def parambuild(self, jobname, params):
         """
@@ -129,7 +136,12 @@ class Job(object):
         :param params: dict
         :return:
         """
-        return json.dumps(self.server.build_job(jobname, params), indent=4)
+        if jobname in json.loads(self.getjoblist()):
+            return json.dumps(self.server.build_job(jobname, params), indent=4)
+        else:
+            result = dict()
+            result["message"] = "there is no such job"
+            return json.dumps(result, indent=4)
 
     def initnewjob(self, jobname, config):
         """
@@ -138,8 +150,13 @@ class Job(object):
         :param config: json
         :return: string
         """
-        self.server.create_job(jobname, xmltodict.unparse(json.loads(config), encoding='utf-8'))
-        return jobname
+        if jobname in json.loads(self.getjoblist()):
+            self.server.create_job(jobname, xmltodict.unparse(json.loads(config), encoding='utf-8'))
+            return jobname
+        else:
+            result = dict()
+            result["message"] = "there is no such job"
+            return json.dumps(result, indent=4)
 
 
 class JobInfo(Job):
@@ -280,6 +297,16 @@ class JobInfo(Job):
     def __getattr__(self, attr):
         if attr == 'obj':
             return "error"
+
+    def buildcheck(self, func):
+        def wrapper(*args, **kw):
+            if self.obj == "error":
+                result = dict()
+                result["message"] = "the build num is beyond the last build num"
+                return json.dumps(result, indent=4)
+            return func(self, *args, **kw)
+
+        return wrapper
 
     @buildcheck
     def getbuildonsole(self):
