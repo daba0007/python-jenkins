@@ -1,41 +1,41 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render, HttpResponse
-from .core import Job, jobInfo
+from django.shortcuts import HttpResponse
+from .core import Job, JobInfo
 
 
-def getVersion(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getVersion())
+def getversion(request):
+    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getversion())
 
 
-def getJobList(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getJobList())
+def getjoblist(request):
+    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getjoblist())
 
 
-def getConfig(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getConfig("pipeline_test"))
+def getconfig(request):
+    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getconfig("pipeline_test"))
 
 
-def getJobStatus(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getJobStatus("pipeline_test"))
+def getjobstatus(request):
+    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getjobstatus("pipeline_test"))
 
 
-def getBuildConsole(request):
-    return HttpResponse(jobInfo(jobname="pipeline_test", buildnum=16, ip="192.168.1.150", uname="admin", pwd="r00tme",
+def getbuildconsole(request):
+    return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=14, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getBuildConsole())
 
 
-def getDownstream(request):
-    return HttpResponse(jobInfo(jobname="pipeline_test", buildnum=14, ip="192.168.1.150", uname="admin", pwd="r00tme",
+def getdownstream(request):
+    return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=14, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getDownstreamBuild())
 
 
-def getUpstream(request):
-    return HttpResponse(jobInfo(jobname="second-stage-1", buildnum=5, ip="192.168.1.150", uname="admin", pwd="r00tme",
+def getupstream(request):
+    return HttpResponse(JobInfo(jobname="second-stage-1", buildnum=5, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getUpstreamBuild())
 
 
-def getBuildobStatus(request):
-    return HttpResponse(jobInfo(jobname="pipeline_test", buildnum=11, ip="192.168.1.150", uname="admin", pwd="r00tme",
+def getbuildobstatus(request):
+    return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=11, ip="192.168.1.150", uname="admin", pwd="r00tme",
                                 port="18080").getBuildobStatus())

@@ -7,6 +7,17 @@ import xmltodict
 import json
 
 
+def buildcheck(func):
+    def wrapper(self, *args, **kw):
+        if self.obj == "error":
+            result = dict()
+            result["message"] = "the build num is beyond the last build num"
+            return json.dumps(result, indent=4)
+        return func(self, *args, **kw)
+
+    return wrapper
+
+
 class Err(Exception):
     def __init__(self, err):
         Exception.__init__(self)
@@ -22,13 +33,13 @@ class Job(object):
         self.url = "http://" + ip + ":" + port + "/"
         self.server = Jenkins(self.url, username=uname, password=pwd)
 
-    def getVersion(self):
+    def getversion(self):
         return json.dumps(self.server.version, indent=4)
 
-    def getJobList(self):
+    def getjoblist(self):
         return json.dumps(self.server.keys(), indent=4)
 
-    def getConfig(self, jobname):
+    def getconfig(self, jobname):
         """
         {
             "flow-definition": {
@@ -84,24 +95,19 @@ class Job(object):
         """
         return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
 
-    def getJobStatus(self, jobname):
-        infolist = {}
+    def getjobstatus(self, jobname):
+        infolist = dict()
         infolist['name'] = self.server[jobname].name
         infolist['description'] = self.server[jobname].get_description()
         infolist['running'] = self.server[jobname].is_running()
         infolist['enabled'] = self.server[jobname].is_enabled()
         return json.dumps(infolist, indent=4)
 
-    def setConfig(self, config):
-        jsdict = json.loads(config)
-        print(xmltodict.unparse(jsdict, encoding='utf-8'))
-        return
-
-    def paramBuild(self, jobname, params):
+    def parambuild(self, jobname, params):
         buildnum = self.server.build_job(jobname, params)
         return json.dumps(buildnum, indent=4)
 
-    def getLastBuid(self, jobname):
+    def getlastbuid(self, jobname):
         """
         :param jobname:
         :return: type(int)
@@ -109,7 +115,7 @@ class Job(object):
         return self.server[jobname].get_last_good_build().__dict__['buildno']
 
 
-class jobInfo(Job):
+class JobInfo(Job):
     def __init__(self, jobname, buildnum, **kwargs):
         """
         # self.server[jobname].__dict__['_data']
@@ -244,45 +250,25 @@ class jobInfo(Job):
         if attr == 'obj':
             return "error"
 
-    def getBuildConsole(self):
-        result = self.obj
-        if result =="error":
-            result = {}
-            result["message"] = "the build num is beyond the last build num"
-            return json.dumps(result, indent=4)
-        else:
-            return json.dumps(result.get_console(), indent=4)
+    @buildcheck
+    def getbuildonsole(self):
+        return json.dumps(self.obj.get_console(), indent=4)
 
-    def getDownstreamBuild(self):
-        result = self.obj
-        if result == "err":
-            result = {}
-            result["message"] = "the build num is beyond the last build num"
-            return json.dumps(result, indent=4)
-        else:
-            result = []
-            for i in self.obj.get_console().split('\n'):
-                if "Starting building:" in i:
-                    result.append({'name': i.split(' ')[2], 'buildnum': i.split(' ')[3].strip('#')})
-            return json.dumps(result, indent=4)
+    @buildcheck
+    def getdownstreambuild(self):
+        result = []
+        for i in self.obj.get_console().split('\n'):
+            if "Starting building:" in i:
+                result.append({'name': i.split(' ')[2], 'buildnum': i.split(' ')[3].strip('#')})
+        return json.dumps(result, indent=4)
 
-    def getUpstreamBuild(self):
-        result = self.obj
-        if result == "err":
-            result = {}
-            result["message"] = "the build num is beyond the last build num"
-            return json.dumps(result, indent=4)
-        else:
-            result = {}
-            result['name'] = self.obj.get_upstream_job().__dict__["name"]
-            result['buildnum'] = self.obj.get_upstream_build_number()
-            return json.dumps(result, indent=4)
+    @buildcheck
+    def getupstreambuild(self):
+        result = dict()
+        result['name'] = self.obj.get_upstream_job().__dict__["name"]
+        result['buildnum'] = self.obj.get_upstream_build_number()
+        return json.dumps(result, indent=4)
 
-    def getBuildobStatus(self):
-        result = self.obj
-        if result == "err":
-            result = {}
-            result["message"] = "the build num is beyond the last build num"
-            return json.dumps(result, indent=4)
-        else:
-            return json.dumps(self.obj.get_status(), indent=4)
+    @buildcheck
+    def getbuildobstatus(self):
+        return json.dumps(self.obj.get_status(), indent=4)

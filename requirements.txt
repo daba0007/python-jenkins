@@ -1,2 +1,3 @@
 xmltodict
 jenkinsapi
+django == 1.11.26
