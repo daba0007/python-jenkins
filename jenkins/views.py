@@ -3,50 +3,67 @@ from __future__ import unicode_literals
 
 from django.shortcuts import HttpResponse
 from .core import Job, JobInfo
+from python_jenkins.settings import JENKINS_PATH
+from python_jenkins.settings import JENKINS_PORT
+from python_jenkins.settings import JENKINS_USER
+from python_jenkins.settings import JENKINS_PWD
 
 
 def getversion(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getversion())
+    return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).getversion())
 
 
 def getjoblist(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getjoblist())
+    return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).getjoblist())
 
 
 def getconfig(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getconfig("pipeline_test"))
+    jobname = request.GET.get('jobname', '')
+    return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).getconfig(jobname))
 
 
 def getjobstatus(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").getjobstatus("pipeline_test"))
+    jobname = request.GET.get('jobname', '')
+    return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).getjobstatus(jobname))
 
 
 def getbuildconsole(request):
-    return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=14, ip="192.168.1.150", uname="admin", pwd="r00tme",
-                                port="18080").getBuildConsole())
+    jobname = request.GET.get('jobname', '')
+    buildnum = request.GET.get('buildnum', '')
+    return HttpResponse(
+        JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
+                port=JENKINS_PORT).getBuildConsole())
 
 
 def postbuildnewjob(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").initnewjob("new_pipeline_test",
-                                                                                    Job("192.168.1.150", "admin",
-                                                                                        "r00tme", "18080").getconfig(
-                                                                                        "pipeline_test")))
+    jobname = request.POST.get('jobname', '')
+    config = request.POST.get('config', '')
+    return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).initnewjob(jobname, config))
 
 
 def getdownstream(request):
-    return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=14, ip="192.168.1.150", uname="admin", pwd="r00tme",
-                                port="18080").getDownstreamBuild())
+    jobname = request.GET.get('jobname', '')
+    buildnum = request.GET.get('buildnum', '')
+    return HttpResponse(
+        JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
+                port=JENKINS_PORT).getDownstreamBuild())
 
 
 def getupstream(request):
-    return HttpResponse(JobInfo(jobname="second-stage-1", buildnum=5, ip="192.168.1.150", uname="admin", pwd="r00tme",
-                                port="18080").getUpstreamBuild())
+    jobname = request.GET.get('jobname', '')
+    buildnum = request.GET.get('buildnum', '')
+    return HttpResponse(
+        JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
+                port=JENKINS_PORT).getUpstreamBuild())
 
 
 def getbuildobstatus(request):
-    return HttpResponse(JobInfo(jobname="pipeline_test", buildnum=11, ip="192.168.1.150", uname="admin", pwd="r00tme",
-                                port="18080").getBuildobStatus())
+    jobname = request.GET.get('jobname', '')
+    buildnum = request.GET.get('buildnum', '')
+    return HttpResponse(
+        JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
+                port=JENKINS_PORT).getBuildobStatus())
 
 
 def initial(request):
-    return HttpResponse(Job("192.168.1.150", "admin", "r00tme", "18080").initialjob())
+    return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).initialjob())

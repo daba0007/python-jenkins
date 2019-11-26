@@ -16,6 +16,11 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INITIAL_PATH = os.path.join(BASE_DIR, 'initial/')
 
+JENKINS_PATH = "192.168.1.146"
+JENKINS_PORT = "18080"
+JENKINS_USER = "admin"
+JENKINS_PWD = "r00tme"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
