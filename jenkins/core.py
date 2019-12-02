@@ -12,8 +12,7 @@ import os
 def buildcheck(func):
     def wrapper(self, *args, **kw):
         if self.obj == "error":
-            result = dict()
-            result["message"] = "the build num is beyond the last build num"
+            result = dict(message="the build num is beyond the last build num")
             return json.dumps(result, indent=4)
         return func(self, *args, **kw)
 
@@ -108,8 +107,7 @@ class Job(object):
         if jobname in json.loads(self.getjoblist()):
             return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
         else:
-            result = dict()
-            result["message"] = "there is no such job"
+            result = dict(message="there is no such job")
             return json.dumps(result, indent=4)
 
     def getjobstatus(self, jobname):
@@ -119,15 +117,11 @@ class Job(object):
         :return:
         """
         if jobname in json.loads(self.getjoblist()):
-            result = dict()
-            result['name'] = self.server[jobname].name
-            result['description'] = self.server[jobname].get_description()
-            result['running'] = self.server[jobname].is_running()
-            result['enabled'] = self.server[jobname].is_enabled()
+            result = dict(name=self.server[jobname].name, description=self.server[jobname].get_description(),
+                          running=self.server[jobname].is_running(), enabled=self.server[jobname].is_enabled())
             return json.dumps(result, indent=4)
         else:
-            result = dict()
-            result["message"] = "there is no such job"
+            result = dict(message="there is no such job")
             return json.dumps(result, indent=4)
 
     def getlastbuid(self, jobname):
@@ -138,8 +132,7 @@ class Job(object):
         if jobname in json.loads(self.getjoblist()):
             return json.dumps(self.server[jobname].get_last_good_build().__dict__['buildno'], indent=4)
         else:
-            result = dict()
-            result["message"] = "there is no such job"
+            result = dict(message="there is no such job")
             return json.dumps(result, indent=4)
 
     def parambuild(self, jobname, params):
@@ -152,8 +145,7 @@ class Job(object):
         if jobname in json.loads(self.getjoblist()):
             return json.dumps(self.server.build_job(jobname, params), indent=4)
         else:
-            result = dict()
-            result["message"] = "there is no such job"
+            result = dict(message="there is no such job")
             return json.dumps(result, indent=4)
 
     def initnewjob(self, jobname, config):
@@ -167,16 +159,14 @@ class Job(object):
         return jobname
 
     def initialjob(self):
-        result = dict()
-        result["filelist"] = os.listdir(INITIAL_PATH)
+        result = dict(filelist=os.listdir(INITIAL_PATH))
         for i in os.listdir(INITIAL_PATH):
             jobname = i.replace('.json', '')
             if jobname not in json.loads(self.getjoblist()):
-                with open(INITIAL_PATH+i, 'r') as f:
+                with open(INITIAL_PATH + i, 'r') as f:
                     job_dict = json.load(f)
                     self.server.create_job(jobname, xmltodict.unparse(job_dict, encoding='utf-8').encode())
         return json.dumps(result, indent=4)
-
 
 
 class JobInfo(Job):
@@ -344,9 +334,7 @@ class JobInfo(Job):
         get upstream job
         :return: json
         """
-        result = dict()
-        result['name'] = self.obj.get_upstream_job().__dict__["name"]
-        result['buildnum'] = self.obj.get_upstream_build_number()
+        result = dict(name=self.obj.get_upstream_job().__dict__["name"], buildnum=self.obj.get_upstream_build_number())
         return json.dumps(result, indent=4)
 
     @buildcheck
