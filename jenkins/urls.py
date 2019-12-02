@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^getbuildobstatus', views.getbuildobstatus, name='getbuildobstatus'),
 
     url(r'^initial', views.initial, name='initial'),
+    url(r'^start', views.start, name='start'),
 ]

@@ -142,6 +142,7 @@ class Job(object):
         :param params: dict
         :return:
         """
+        print(jobname)
         if jobname in json.loads(self.getjoblist()):
             return json.dumps(self.server.build_job(jobname, params), indent=4)
         else:

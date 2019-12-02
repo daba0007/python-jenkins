@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 from django.shortcuts import HttpResponse
 from .core import Job, JobInfo
 from python_jenkins.settings import JENKINS_PATH
@@ -67,3 +68,15 @@ def getbuildobstatus(request):
 
 def initial(request):
     return HttpResponse(Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).initialjob())
+
+
+def start(request):
+    jobname = request.POST.get('jobname', '')
+    params = {}
+    for i in request.POST.keys():
+        if i != 'jobname':
+            params[i] = request.POST.get(i, '')
+
+    print(params)
+    return HttpResponse(
+        Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).parambuild(jobname=jobname, params=params))
