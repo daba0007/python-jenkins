@@ -80,3 +80,4 @@ def start(request):
     print(params)
     return HttpResponse(
         Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).parambuild(jobname=jobname, params=params))
+
