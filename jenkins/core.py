@@ -104,7 +104,7 @@ class Job(object):
         with open(path, 'w') as f:
             json.dump(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), f)
         """
-        if jobname in json.loads(self.getjoblist()):
+        if self.server.has_job(jobname):
             return json.dumps(xmltodict.parse(self.server[jobname].get_config(), encoding='utf-8'), indent=4)
         else:
             result = dict(message="there is no such job")
@@ -116,7 +116,7 @@ class Job(object):
         :param jobname: string
         :return:
         """
-        if jobname in json.loads(self.getjoblist()):
+        if self.server.has_job(jobname):
             result = dict(name=self.server[jobname].name, description=self.server[jobname].get_description(),
                           running=self.server[jobname].is_running(), enabled=self.server[jobname].is_enabled())
             return json.dumps(result, indent=4)
@@ -129,7 +129,7 @@ class Job(object):
         :param jobname:
         :return: type(int)
         """
-        if jobname in json.loads(self.getjoblist()):
+        if self.server.has_job(jobname):
             return json.dumps(self.server[jobname].get_last_good_build().__dict__['buildno'], indent=4)
         else:
             result = dict(message="there is no such job")
@@ -142,9 +142,11 @@ class Job(object):
         :param params: dict
         :return:
         """
-        print(jobname)
-        if jobname in json.loads(self.getjoblist()):
-            return json.dumps(self.server.build_job(jobname, params), indent=4)
+        if self.server.has_job(jobname):
+            job = self.server[jobname].invoke(build_params=params)
+            if job.is_running() or job.is_queued():
+                job.block_until_complete()
+            return json.dumps(dict(number=job.__dict__['_data']['executable']['number']), indent=4)
         else:
             result = dict(message="there is no such job")
             return json.dumps(result, indent=4)

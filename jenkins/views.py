@@ -76,8 +76,5 @@ def start(request):
     for i in request.POST.keys():
         if i != 'jobname':
             params[i] = request.POST.get(i, '')
-
-    print(params)
     return HttpResponse(
         Job(JENKINS_PATH, JENKINS_USER, JENKINS_PWD, JENKINS_PORT).parambuild(jobname=jobname, params=params))
-
