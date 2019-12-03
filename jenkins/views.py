@@ -33,7 +33,7 @@ def getbuildconsole(request):
     buildnum = request.GET.get('buildnum', '')
     return HttpResponse(
         JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
-                port=JENKINS_PORT).getBuildConsole())
+                port=JENKINS_PORT).getbuildonsole())
 
 
 def postbuildnewjob(request):
@@ -47,7 +47,7 @@ def getdownstream(request):
     buildnum = request.GET.get('buildnum', '')
     return HttpResponse(
         JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
-                port=JENKINS_PORT).getDownstreamBuild())
+                port=JENKINS_PORT).getdownstreambuild())
 
 
 def getupstream(request):
@@ -55,7 +55,7 @@ def getupstream(request):
     buildnum = request.GET.get('buildnum', '')
     return HttpResponse(
         JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
-                port=JENKINS_PORT).getUpstreamBuild())
+                port=JENKINS_PORT).getupstreambuild())
 
 
 def getbuildobstatus(request):
@@ -63,7 +63,7 @@ def getbuildobstatus(request):
     buildnum = request.GET.get('buildnum', '')
     return HttpResponse(
         JobInfo(jobname=jobname, buildnum=buildnum, ip=JENKINS_PATH, uname=JENKINS_USER, pwd=JENKINS_PWD,
-                port=JENKINS_PORT).getBuildobStatus())
+                port=JENKINS_PORT).getbuildobstatus())
 
 
 def initial(request):

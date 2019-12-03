@@ -303,7 +303,7 @@ class JobInfo(Job):
         """
         super().__init__(**kwargs)
         for i in self.server[jobname].__dict__['_data']['builds']:
-            if i['number'] == buildnum:
+            if i['number'] == int(buildnum):
                 self.obj = Build(i['url'], i['number'], self.server[jobname])
                 break
 
@@ -312,7 +312,7 @@ class JobInfo(Job):
             return "error"
 
     @buildcheck
-    def getbuildonsole(self):
+    def getbuildconsole(self):
         """
         get all console from job
         :return: json

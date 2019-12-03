@@ -13,7 +13,6 @@ urlpatterns = [
     url(r'^getdownstream', views.getdownstream, name='getdownstream'),
     url(r'^getupstream', views.getupstream, name='getupstream'),
     url(r'^getbuildobstatus', views.getbuildobstatus, name='getbuildobstatus'),
-    url(r'^getbuildobstatus', views.getbuildobstatus, name='getbuildobstatus'),
 
     url(r'^initial', views.initial, name='initial'),
     url(r'^start', views.start, name='start'),
